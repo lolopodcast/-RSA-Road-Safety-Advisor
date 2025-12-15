@@ -111,12 +111,21 @@
             ibs: "https://www.ibs.ncnu.edu.tw/",
             ncnu: "https://rpage.ncnu.edu.tw/"
         };
-        const SCHOOLS = ["國立暨南國際大學 (National Chi Nan University)", "國立台灣大學 (National Taiwan University)", "國立清華大學 (National Tsing Hua University)"];
+        const SCHOOLS = ["國立暨南國際大學 (National Chi Nan University)", "國立台灣大學 (National Taiwan University)", "國立清華大學 (National Tsing Hua University)", "國立交通大學 (National Chiao Tung University)", "國立政治大學 (National Chengchi University)"];
+        
+        // Coordinates for each school
+        const SCHOOL_COORDS = {
+            "國立暨南國際大學 (National Chi Nan University)": { lat: 23.952, lon: 120.927 },
+            "國立台灣大學 (National Taiwan University)": { lat: 25.0174, lon: 121.5379 },
+            "國立清華大學 (National Tsing Hua University)": { lat: 24.7961, lon: 120.9967 },
+            "國立交通大學 (National Chiao Tung University)": { lat: 24.7868, lon: 120.9972 },
+            "國立政治大學 (National Chengchi University)": { lat: 24.9869, lon: 121.5753 }
+        };
+
         const LOCATIONS = {
             start: ["校門口 (Main Gate)", "學生宿舍 (Dormitory)", "行政大樓 (Admin Bldg)"],
             end: ["轉運站 (Bus Station)", "市區中心 (City Center)", "火車站 (Train Station)"]
         };
-        const MAP_CENTER = { lat: 23.952, lon: 120.927 }; 
         const DEFAULT_SCHOOL = "國立暨南國際大學 (National Chi Nan University)";
 
         const UI_TEXT = {
@@ -137,7 +146,7 @@
                 mapSimNote: "操作說明：滾輪縮放地圖，按住左鍵拖曳移動", flipHint: "點擊翻轉", mapModeSim: "情境模擬地圖",
                 mapModeReal: "真實地圖 (OSM)", officialTitle: "全國道路安全資訊與資源", officialChartTitle: "近年全國道路交通事故死亡人數趨勢 (模擬數據)",
                 officialLinks: "重要官方資源連結", togglePanel: "儀表板設定", toggleMap: "地圖顯示", toggleContent: "詳細內容",
-                exportCSV: "匯出學習紀錄 (CSV)", trafficLabel: "路況"
+                exportCSV: "匯出學習紀錄 (CSV)", trafficLabel: "模擬路況"
             },
             en: {
                 brandSubtitle: "Road Risk & Safety Coach", slogan: "Know Well, Stay Safe", valueProp: "Your Road Safety Companion",
@@ -268,7 +277,7 @@
                         { term: "情緒駕駛 (Road Rage)", def: "因交通狀況產生的憤怒情緒，導致攻擊性駕駛行為。" },
                         { term: "隧道視野", def: "專注於單一點而忽略周邊環境的視覺現象，常發生於高速或緊張時。" }
                     ],
-                    quizPool: [{ q: "服用抗組織胺藥物後?", options: ["精神更好", "可能嗜睡", "無影響"], ans: 1 }, { q: "突發障礙物，視線應?", options: ["盯著障礙物", "看安全出口", "閉眼"], ans: 1 }, { q: "長途駕駛休息頻率?", options: ["4小時", "2小時", "不用"], ans: 1 }, { q: "生氣時駕駛?", options: ["開快點洩憤", "深呼吸冷靜或不開", "大吼大叫"], ans: 1 }, { q: "煞車時重心會?", options: ["後移", "前移", "不變"], ans: 1 }, { q: "輪胎磨平會影響?", options: ["排水性", "油耗", "冷氣"], ans: 0 }, { q: "載人時煞車距離?", options: ["變短", "變長", "不變"], ans: 1 }, { q: "酒後駕車?", options: ["喝少沒關係", "絕對禁止", "騎慢點"], ans: 1 }, { q: "看到球滾出來?", options: ["加速通過", "預測有小孩衝出", "按喇叭"], ans: 1 }]
+                    quizPool: [{ q: "吃感冒藥?", options: ["精神好", "嗜睡", "沒差"], ans: 1 }, { q: "長途休息?", options: ["4hr", "2hr", "免"], ans: 1 }, { q: "載人煞車?", options: ["變短", "變長", "不變"], ans: 1 }, { q: "微睡眠?", options: ["休息", "繼續", "喝咖啡"], ans: 0 }]
                 },
                 en: {
                     title: "Safety Capability", summary: "Physiological & Tech.",
@@ -276,19 +285,18 @@
                     skills: [{ title: "Evasion", desc: "Look at exit." }, { title: "Stability", desc: "Grip tank." }, { title: "Space", desc: "Width judgment." }],
                     attitude: [{ title: "Learning", desc: "Update skills." }, { title: "Honesty", desc: "Self-assess." }, { title: "Calm", desc: "Control emotions." }],
                     glossary: [
-                        { term: "Reaction Time", def: "Time from perception to action." },
-                        { term: "Dynamic Visual Acuity", def: "Seeing details while moving." },
-                        { term: "Microsleep", def: "Brief loss of consciousness." },
-                        { term: "Anticipation", def: "Predicting other road users' actions." },
-                        { term: "Stress Tolerance", def: "Staying calm in traffic." },
-                        { term: "Hand-eye Coordination", def: "Syncing vision with controls." },
+                        { term: "Reaction Time", def: "Perception to action." },
+                        { term: "Microsleep", def: "Brief blackout." },
+                        { term: "Dynamic Vision", def: "Seeing while moving." },
+                        { term: "Anticipation", def: "Prediction." },
+                        { term: "Stress Tolerance", def: "Staying calm." },
+                        { term: "Hand-eye Coord.", def: "Control sync." },
                         { term: "Muscle Memory", def: "Automatic reactions from practice." },
-                        { term: "Spatial Awareness", def: "Sensing vehicle position." },
-                        { term: "BAC", def: "Blood Alcohol Concentration." },
-                        { term: "Road Rage", def: "Aggressive driving due to anger." },
-                        { term: "Tunnel Vision", def: "Loss of peripheral sight." }
+                        { term: "Spatial Awareness", def: "Distance judging." },
+                        { term: "Tunnel Vision", def: "Narrow view." },
+                        { term: "Side Effects", def: "Drowsiness from meds." }
                     ],
-                    quizPool: [{ q: "Antihistamines effect?", options: ["Alert", "Drowsy", "None"], ans: 1 }, { q: "Sudden obstacle, look at?", options: ["Obstacle", "Safe path", "Close eyes"], ans: 1 }, { q: "Long drive rest?", options: ["4 hrs", "2 hrs", "None"], ans: 1 }, { q: "Driving while angry?", options: ["Drive fast", "Calm down", "Scream"], ans: 1 }, { q: "Braking weight transfer?", options: ["Back", "Front", "None"], ans: 1 }, { q: "Worn tires affect?", options: ["Drainage", "Fuel", "AC"], ans: 0 }, { q: "Braking with passenger?", options: ["Shorter", "Longer", "Same"], ans: 1 }, { q: "Drink driving?", options: ["Little is ok", "Prohibited", "Drive slow"], ans: 1 }, { q: "Ball rolls into street?", options: ["Speed up", "Expect child", "Honk"], ans: 1 }]
+                    quizPool: [{ q: "Cold meds?", options: ["Alert", "Drowsy", "Same"], ans: 1 }, { q: "Rest interval?", options: ["4hr", "2hr", "None"], ans: 1 }, { q: "Passenger brake?", options: ["Short", "Long", "Same"], ans: 1 }, { q: "Microsleep?", options: ["Stop", "Go", "Coffee"], ans: 0 }]
                 }
             }
         };
@@ -318,9 +326,12 @@
             const t = UI_TEXT[lang];
             if (isCompact) {
                 return (
-                    <div className="flex flex-col justify-center bg-emerald-700 p-2 px-4 rounded-sm shadow-sm text-white min-w-[180px]">
-                        <div className="flex items-center gap-2"><Shield className="w-6 h-6 text-emerald-300" /><h1 className="text-2xl font-bold tracking-tight font-sans">RSA</h1></div>
-                        <div className="text-emerald-100 font-bold text-[10px] tracking-widest uppercase">ROAD SAFETY ADVISOR</div>
+                    <div className="flex flex-col justify-center bg-emerald-700 p-2 px-3 rounded-sm shadow-sm text-white w-fit">
+                        <div className="flex items-center gap-2">
+                            <Shield className="w-5 h-5 text-emerald-300" />
+                            <h1 className="text-xl font-bold tracking-tight font-sans">RSA</h1>
+                        </div>
+                        <div className="text-emerald-100 font-bold text-[8px] tracking-widest uppercase whitespace-nowrap">ROAD SAFETY ADVISOR</div>
                     </div>
                 );
             }
@@ -338,13 +349,38 @@
         const FlipCard = ({ item, lang, isOpen, onToggle }) => {
             const t = UI_TEXT[lang];
             return (
-                <div className="relative w-full h-32 cursor-pointer group" onClick={(e) => { if (!isOpen) { e.stopPropagation(); onToggle(); } }} style={{ perspective: '1000px' }}>
-                    <div className="w-full h-full transition-all duration-500" style={{ transformStyle: 'preserve-3d', transform: isOpen ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
-                        <div className="absolute inset-0 bg-white dark:bg-slate-800 p-4 rounded-sm shadow-sm border-l-4 border-blue-500 flex flex-col justify-center items-center text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
+                <div 
+                    className="relative w-full h-32 cursor-pointer group"
+                    onClick={(e) => {
+                        if (!isOpen) {
+                            e.stopPropagation();
+                            onToggle();
+                        }
+                    }}
+                    style={{ perspective: '1000px' }}
+                >
+                    <div 
+                        className="w-full h-full transition-all duration-500"
+                        style={{ 
+                            transformStyle: 'preserve-3d',
+                            transform: isOpen ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                        }}
+                    >
+                        <div 
+                            className="absolute inset-0 bg-white dark:bg-slate-800 p-4 rounded-sm shadow-sm border-l-4 border-blue-500 flex flex-col justify-center items-center text-center"
+                            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                        >
                             <h4 className="font-bold text-slate-700 dark:text-slate-200 text-sm">{item.title}</h4>
                             <p className="text-[10px] text-blue-500 mt-2 flex items-center gap-1"><RotateCcw className="w-3 h-3" /> {t.flipHint}</p>
                         </div>
-                        <div className="absolute inset-0 bg-blue-50 dark:bg-slate-700 p-4 rounded-sm shadow-sm border border-blue-200 dark:border-slate-600 flex items-center justify-center text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                        <div 
+                            className="absolute inset-0 bg-blue-50 dark:bg-slate-700 p-4 rounded-sm shadow-sm border border-blue-200 dark:border-slate-600 flex items-center justify-center text-center"
+                            style={{ 
+                                backfaceVisibility: 'hidden', 
+                                WebkitBackfaceVisibility: 'hidden',
+                                transform: 'rotateY(180deg)' 
+                            }}
+                        >
                             <p className="text-xs text-slate-600 dark:text-slate-200 pointer-events-none">{item.desc}</p>
                         </div>
                     </div>
@@ -359,7 +395,10 @@
                     <div className="text-sm font-bold text-slate-700 dark:text-slate-200">{data.temp}°C</div>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden border border-slate-200 z-10">
-                    <div className={`h-full transition-all duration-1000 ${data.temp > 30 ? 'bg-red-500' : 'bg-amber-400'}`} style={{ width: `${(data.temp / 45) * 100}%` }}></div>
+                    <div 
+                        className={`h-full transition-all duration-1000 ${data.temp > 30 ? 'bg-red-500' : 'bg-amber-400'}`}
+                        style={{ width: `${(data.temp / 45) * 100}%` }}
+                    ></div>
                 </div>
                 <div className="w-full text-right mt-1 text-[10px] text-slate-500 z-10">{data.condition}</div>
             </div>
@@ -373,30 +412,42 @@
                 </div>
                 <div className="w-full flex gap-1 h-2 mt-1 z-10">
                     {[...Array(5)].map((_, i) => (
-                        <div key={i} className={`flex-1 rounded-sm transition-colors duration-500 ${i < (data.trafficLoad / 20) ? (data.trafficLoad > 80 ? 'bg-red-500' : data.trafficLoad > 50 ? 'bg-amber-400' : 'bg-emerald-400') : 'bg-slate-100 dark:bg-slate-700'}`}></div>
+                        <div 
+                            key={i} 
+                            className={`flex-1 rounded-sm transition-colors duration-500 ${
+                                i < (data.trafficLoad / 20) 
+                                ? (data.trafficLoad > 80 ? 'bg-red-500' : data.trafficLoad > 50 ? 'bg-amber-400' : 'bg-emerald-400') 
+                                : 'bg-slate-100 dark:bg-slate-700'
+                            }`}
+                        ></div>
                     ))}
                 </div>
                 <div className="w-full text-right mt-1 text-[10px] text-slate-500 z-10">{data.trafficStatus}</div>
             </div>
         );
 
-        const MapComponent = ({ lang, transport, waypoints, mapScale, isNight, trafficLoad, startLoc, endLoc, mapMode, setMapMode }) => {
+        const MapComponent = ({ lang, transport, waypoints, mapScale, isNight, trafficLoad, startLoc, endLoc, mapMode, setMapMode, school }) => {
             const t = UI_TEXT[lang];
             const [viewState, setViewState] = useState({ x: 0, y: 0, scale: 1.5 });
             const [isDragging, setIsDragging] = useState(false);
             const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
             const containerRef = useRef(null);
 
+            // Get coords based on selected school
+            const currentCoords = useMemo(() => {
+                return SCHOOL_COORDS[school] || SCHOOL_COORDS[DEFAULT_SCHOOL];
+            }, [school]);
+
             const osmSrc = useMemo(() => {
                 let delta = 0.005; 
                 if (mapScale === 100) delta = 0.002;
                 if (mapScale === 1000) delta = 0.015;
-                const minLon = MAP_CENTER.lon - delta;
-                const maxLon = MAP_CENTER.lon + delta;
-                const minLat = MAP_CENTER.lat - delta;
-                const maxLat = MAP_CENTER.lat + delta;
+                const minLon = currentCoords.lon - delta;
+                const maxLon = currentCoords.lon + delta;
+                const minLat = currentCoords.lat - delta;
+                const maxLat = currentCoords.lat + delta;
                 return `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&amp;layer=mapnik`;
-            }, [mapScale]);
+            }, [mapScale, currentCoords]);
 
             useEffect(() => {
                 let newScale = 1.5;
@@ -459,8 +510,8 @@
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M-500,800 Q400,400 1200,800 T2400,400" fill="none" stroke={mainRoadStroke} strokeWidth="50" strokeLinecap="round" className="transition-colors duration-1000" />
                                             <path d="M800,-400 Q900,400 800,1200" fill="none" stroke={roadStroke} strokeWidth="45" strokeLinecap="round" className="transition-colors duration-1000" />
-                                            <path d="M200,200 L1600,1000" fill="none" stroke={trafficLoad > 60 ? roadStroke : (isNight ? "#1e293b" : "#e2e8f0")} strokeWidth="25" className="transition-colors duration-1000" />
-                                            <path d="M1600,200 L200,1000" fill="none" stroke={trafficLoad > 60 ? roadStroke : (isNight ? "#1e293b" : "#e2e8f0")} strokeWidth="25" className="transition-colors duration-1000" />
+                                            <path d="M200,200 L1600,1000" fill="none" stroke={trafficLoad > 60 ? roadStroke : (isNight ? "#1e293b" : "#e2e8f0")} strokeWidth="25" />
+                                            <path d="M1600,200 L200,1000" fill="none" stroke={trafficLoad > 60 ? roadStroke : (isNight ? "#1e293b" : "#e2e8f0")} strokeWidth="25" />
                                             <path d="M700,500 L900,300" fill="none" stroke={trafficLoad > 80 ? '#ef4444' : '#10b981'} strokeWidth="8" strokeDasharray="12 6" strokeLinecap="round" className="animate-[dash_20s_linear_infinite]" />
                                         </svg>
                                     </div>
@@ -597,7 +648,7 @@
                             <div><label className="block text-xs font-bold text-slate-500 uppercase mb-1">{t.selectSchool}</label><div className="relative"><select value={school} onChange={(e) => setSchool(e.target.value)} className="w-full appearance-none border border-slate-300 rounded-sm px-3 py-2 bg-slate-50 text-slate-700 dark:text-slate-200 text-sm pr-8 focus:ring-1 focus:ring-emerald-500 outline-none">{SCHOOLS.map(s => <option key={s} value={s}>{s}</option>)}</select><div className="absolute right-3 top-2.5 pointer-events-none"><ArrowRight className="w-4 h-4 text-slate-400 rotate-90" /></div></div></div>
                         </div>
                         <div className="space-y-3 mt-4">
-                            {[{ id: 'risk', label: t.btnRisk }, { id: 'guidelines', label: t.btnGuide }, { id: 'capability', label: t.btnCap }, { id: 'record', label: t.btnRecord }].map((btn) => (
+                            {[{ id: 'risk', label: t.btnRisk }, { id: 'guidelines', label: t.btnGuide }, { id: 'capability', label: t.btnCap }, { id: 'record', label: t.btnRecord }, { id: 'official', label: t.btnOfficial }].map((btn) => (
                                 <button key={btn.id} onClick={() => handleLogin(btn.id)} className="w-full group flex items-center justify-between px-4 py-3 bg-white border border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all duration-200 rounded-sm shadow-sm">
                                     <span className="font-semibold text-sm">{btn.label}</span>
                                     <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
@@ -676,7 +727,9 @@
                 <div className={`min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300 ${theme === 'dark' ? 'dark' : ''}`}>
                     <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-emerald-600 sticky top-0 z-50">
                         <div className="container mx-auto px-4 py-2 flex justify-between items-center h-20">
-                            <HeroSection isCompact={true} lang={lang} />
+                            <div onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="cursor-pointer hover:opacity-90 transition-opacity">
+                                <HeroSection isCompact={true} lang={lang} />
+                            </div>
                             <div className="hidden md:flex flex-col items-center justify-center flex-grow px-8">
                                 <h2 className="text-xl font-medium text-slate-700 dark:text-slate-200 italic serif">"{t.slogan}"</h2>
                                 <div className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm tracking-wide mt-1">{t.valueProp}</div>
@@ -765,11 +818,12 @@
                     )}
 
                     {sections.map && (
-                        <div className="container mx-auto p-4 animate-in fade-in zoom-in-95">
+                        <div className="mx-[10%] p-4 animate-in fade-in zoom-in-95">
                             <MapComponent 
                                 lang={lang} transport={transport} waypoints={waypoints} 
                                 mapScale={mapScale} isNight={simData.isNight} trafficLoad={simData.trafficLoad}
                                 startLoc={startLocation} endLoc={endLocation} mapMode={mapMode} setMapMode={setMapMode}
+                                school={school}
                             />
                         </div>
                     )}
@@ -871,7 +925,7 @@
                     
                     <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-6 mt-8">
                         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 dark:text-slate-400">
-                            <div className="mb-4 md:mb-0"><p>&copy; {new Date().getFullYear()} RSA Road Safety Advisor. Ver 2.1.0</p><p className="mt-1">{t.lastUpdate}: {lang === 'zh' ? currentDateTime.toLocaleDateString() : currentDateTime.toLocaleDateString('en-US')}</p></div>
+                            <div className="mb-4 md:mb-0"><p>&copy; {new Date().getFullYear()} RSA Road Safety Advisor. Ver 2.4.0</p><p className="mt-1">{t.lastUpdate}: {lang === 'zh' ? currentDateTime.toLocaleDateString() : currentDateTime.toLocaleDateString('en-US')}</p></div>
                             <div className="flex items-center gap-6">
                                 <a href={LINKS.prof} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors font-bold">{t.creator}</a><div className="h-3 w-px bg-slate-300"></div>
                                 <a href={LINKS.ibs} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">IBS</a><div className="h-3 w-px bg-slate-300"></div>
