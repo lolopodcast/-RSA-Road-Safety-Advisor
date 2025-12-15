@@ -7,7 +7,7 @@ import {
   Cloud, Moon as MoonIcon, BarChart3, 
   Triangle, Square, RotateCcw, Building,
   ExternalLink, MousePointer2, Eye, EyeOff, LogOut, ZoomIn, ZoomOut, Link as LinkIcon,
-  Download
+  Download, CarFront
 } from 'lucide-react';
 
 // --- Constants & Dictionary ---
@@ -100,7 +100,8 @@ const UI_TEXT = {
     togglePanel: "儀表板設定",
     toggleMap: "地圖顯示",
     toggleContent: "詳細內容",
-    exportCSV: "匯出學習紀錄 (CSV)"
+    exportCSV: "匯出學習紀錄 (CSV)",
+    trafficLabel: "模擬路況"
   },
   en: {
     brandSubtitle: "Road Risk & Safety Coach",
@@ -167,7 +168,8 @@ const UI_TEXT = {
     togglePanel: "Dashboard",
     toggleMap: "Map View",
     toggleContent: "Details",
-    exportCSV: "Export CSV"
+    exportCSV: "Export CSV",
+    trafficLabel: "Traffic"
   }
 };
 
@@ -664,8 +666,26 @@ const MapComponent = ({ lang, transport, waypoints, mapScale, isNight, trafficLo
     setIsDragging(false);
   };
 
-  // Traffic Color
+  // Traffic Color & Status Logic
+  const getTrafficColor = (load) => {
+    if (load > 80) return '#ef4444'; // Red
+    if (load > 60) return '#f59e0b'; // Amber
+    return '#10b981'; // Green
+  };
+
+  const trafficColor = getTrafficColor(trafficLoad);
+  const trafficText = trafficLoad > 80 
+    ? (lang === 'zh' ? '壅塞' : 'Heavy') 
+    : trafficLoad > 60 
+      ? (lang === 'zh' ? '車多' : 'Moderate') 
+      : (lang === 'zh' ? '順暢' : 'Smooth');
+
+  // Traffic Color for Roads in Sim Mode
+  const roadStroke = trafficColor;
+  
+  // Real map stroke is irrelevant as we use iframe, but for Sim mode:
   const mainRoadStroke = trafficLoad > 80 ? '#ef4444' : trafficLoad > 60 ? '#f59e0b' : (isNight ? '#475569' : '#fff');
+  
   const startPos = startLoc.includes("Gate") || startLoc.includes("校門") ? { top: '55%', left: '45%' } : { top: '65%', left: '35%' };
   const endPos = endLoc.includes("Station") || endLoc.includes("轉運") ? { top: '35%', left: '65%' } : { top: '25%', left: '75%' };
 
@@ -680,6 +700,14 @@ const MapComponent = ({ lang, transport, waypoints, mapScale, isNight, trafficLo
       <div className="absolute top-2 left-2 z-40 flex bg-white/90 dark:bg-slate-800/90 rounded border border-slate-300 dark:border-slate-600 p-0.5">
          <button onClick={() => setMapMode('sim')} className={`px-2 py-1 text-[10px] font-bold rounded-sm ${mapMode === 'sim' ? 'bg-emerald-600 text-white' : 'text-slate-500'}`}>{t.mapModeSim}</button>
          <button onClick={() => setMapMode('real')} className={`px-2 py-1 text-[10px] font-bold rounded-sm ${mapMode === 'real' ? 'bg-emerald-600 text-white' : 'text-slate-500'}`}>{t.mapModeReal}</button>
+      </div>
+
+      {/* Traffic Status Indicator */}
+      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-40 flex items-center gap-2 bg-white/95 dark:bg-slate-800/95 px-3 py-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-600 pointer-events-none">
+        <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: trafficColor }}></div>
+        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+          {t.trafficLabel}: {trafficText}
+        </span>
       </div>
 
       {mapMode === 'real' ? (
@@ -719,17 +747,20 @@ const MapComponent = ({ lang, transport, waypoints, mapScale, isNight, trafficLo
                  {/* Features */}
                  <div className="absolute top-[20%] left-[60%] w-[500px] h-[500px] bg-blue-200/50 dark:bg-blue-900/30 rounded-full blur-3xl pointer-events-none"></div>
 
-                 {/* Roads */}
+                 {/* Roads - Dynamic Colors based on Traffic */}
                  <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                   <path d="M-500,800 Q400,400 1200,800 T2400,400" fill="none" stroke={mainRoadStroke} strokeWidth="50" strokeLinecap="round" />
+                   {/* Main Highway */}
+                   <path d="M-500,800 Q400,400 1200,800 T2400,400" fill="none" stroke={roadStroke} strokeWidth="50" strokeLinecap="round" className="transition-colors duration-1000" />
                    <path d="M-500,800 Q400,400 1200,800 T2400,400" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="10 10" className="opacity-50" />
-                   <path d="M800,-400 Q900,400 800,1200" fill="none" stroke={mainRoadStroke} strokeWidth="45" strokeLinecap="round" />
                    
-                   {/* Local Roads */}
-                   <path d="M200,200 L1600,1000" fill="none" stroke={isNight ? "#1e293b" : "#e2e8f0"} strokeWidth="25" />
-                   <path d="M1600,200 L200,1000" fill="none" stroke={isNight ? "#1e293b" : "#e2e8f0"} strokeWidth="25" />
+                   {/* Cross City Road */}
+                   <path d="M800,-400 Q900,400 800,1200" fill="none" stroke={roadStroke} strokeWidth="45" strokeLinecap="round" className="transition-colors duration-1000" />
                    
-                   {/* Route */}
+                   {/* Local Roads - Using slightly darker traffic color or standard */}
+                   <path d="M200,200 L1600,1000" fill="none" stroke={trafficLoad > 60 ? roadStroke : (isNight ? "#1e293b" : "#e2e8f0")} strokeWidth="25" className="transition-colors duration-1000" />
+                   <path d="M1600,200 L200,1000" fill="none" stroke={trafficLoad > 60 ? roadStroke : (isNight ? "#1e293b" : "#e2e8f0")} strokeWidth="25" className="transition-colors duration-1000" />
+                   
+                   {/* Route Highlight */}
                    <path d="M700,500 L900,300" fill="none" stroke={trafficLoad > 80 ? '#ef4444' : '#10b981'} strokeWidth="8" strokeDasharray="12 6" strokeLinecap="round" className="animate-[dash_20s_linear_infinite]" />
                  </svg>
               </div>
