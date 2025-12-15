@@ -15,6 +15,10 @@
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Leaflet CSS & JS (For Real Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <!-- Custom Styles -->
     <style>
         .perspective-1000 { perspective: 1000px; }
@@ -26,6 +30,12 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        /* Fix Leaflet Z-Index in Tailwind */
+        .leaflet-pane { z-index: 10 !important; }
+        .leaflet-bottom.leaflet-right { z-index: 20 !important; }
+        /* Custom Marker Icons for Leaflet */
+        .custom-pin { background: transparent; border: none; }
+        .custom-pin svg { filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.3)); }
     </style>
     
     <script>
@@ -113,7 +123,6 @@
         };
         const SCHOOLS = ["國立暨南國際大學 (National Chi Nan University)", "國立台灣大學 (National Taiwan University)", "國立清華大學 (National Tsing Hua University)", "國立交通大學 (National Chiao Tung University)", "國立政治大學 (National Chengchi University)"];
         
-        // Coordinates for each school
         const SCHOOL_COORDS = {
             "國立暨南國際大學 (National Chi Nan University)": { lat: 23.952, lon: 120.927 },
             "國立台灣大學 (National Taiwan University)": { lat: 25.0174, lon: 121.5379 },
@@ -178,7 +187,8 @@
         const CONTENT_DATA = {
             risk: {
                 zh: {
-                    title: "風險評估", summary: "基於當前環境條件與路徑拓撲的潛在道路危險綜合分析。",
+                    title: "風險評估", 
+                    summary: "透過數據分析協助您識別道路潛在危險。重點包含：1. 識別大型車內輪差與視線死角熱區。2. 理解雨天路面摩擦係數對煞車距離的影響。3. 建立防禦性駕駛預判能力，不只顧好自己，更要預想他人可能的錯誤。",
                     knowledge: [{ title: "視線死角", desc: "大型車轉彎內輪差識別。" }, { title: "摩擦係數", desc: "雨天路面濕滑。" }, { title: "防禦性駕駛", desc: "預想他人可能犯錯。" }],
                     skills: [{ title: "緊急煞車", desc: "ABS作動控制。" }, { title: "視線掃描", desc: "5-8秒掃描後視鏡。" }, { title: "盲點檢查", desc: "變換車道前轉頭。" }],
                     attitude: [{ title: "風險趨避", desc: "選擇安全路徑。" }, { title: "耐心禮讓", desc: "理解路權。" }, { title: "自我監控", desc: "疲勞時休息。" }],
@@ -197,7 +207,8 @@
                     quizPool: [{ q: "大車轉彎危險區?", options: ["後方", "內輪差", "左側"], ans: 1 }, { q: "雨天過標線?", options: ["急煞", "等速直線", "壓車"], ans: 1 }, { q: "防禦性駕駛?", options: ["預設危險", "開快", "只管自己"], ans: 0 }, { q: "大車轉彎?", options: ["加速通過", "遠離", "並行"], ans: 1 }]
                 },
                 en: {
-                    title: "Risk Assessment", summary: "Hazard analysis.",
+                    title: "Risk Assessment", 
+                    summary: "Data-driven analysis to identify road hazards. Key points: 1. Identify large vehicle blind spots and inner wheel difference. 2. Understand how rain affects friction and braking distance. 3. Develop defensive driving anticipation skills.",
                     knowledge: [{ title: "Blind Spots", desc: "Inner wheel difference." }, { title: "Friction", desc: "Wet roads." }, { title: "Defensive Driving", desc: "Anticipate errors." }],
                     skills: [{ title: "Braking", desc: "ABS control." }, { title: "Scanning", desc: "Check mirrors." }, { title: "Blind Spot", desc: "Shoulder check." }],
                     attitude: [{ title: "Aversion", desc: "Safe routes." }, { title: "Patience", desc: "Yielding." }, { title: "Monitoring", desc: "Rest if tired." }],
@@ -218,7 +229,8 @@
             },
             guidelines: {
                 zh: {
-                    title: "安全指引", summary: "標準作業程序與法規。",
+                    title: "安全指引", 
+                    summary: "彙整標準作業程序 (SOP) 與交通法規。重點包含：1. 絕對遵守路權優先順序（轉彎讓直行、支道讓幹道）。2. 落實行前車輛檢查（五油三水、胎紋）。3. 正確使用燈號溝通與配戴合格防護裝備。",
                     knowledge: [{ title: "路權", desc: "轉彎讓直行。" }, { title: "速限", desc: "法規為上限。" }, { title: "號誌", desc: "閃紅燈停車。" }],
                     skills: [{ title: "裝備", desc: "戴好安全帽。" }, { title: "檢查", desc: "五油三水。" }, { title: "燈號", desc: "提早打燈。" }],
                     attitude: [{ title: "守法", desc: "遵守規則。" }, { title: "禮讓", desc: "禮讓行人。" }, { title: "責任", desc: "不酒駕。" }],
@@ -238,7 +250,8 @@
                     quizPool: [{ q: "閃紅燈?", options: ["減速", "停車", "加速"], ans: 1 }, { q: "雙黃線?", options: ["超車", "禁跨越", "迴轉"], ans: 1 }, { q: "禮讓行人?", options: ["鳴笛", "繞過", "暫停"], ans: 2 }, { q: "圓環?", options: ["讓環內", "搶快", "隨意"], ans: 0 }]
                 },
                 en: {
-                    title: "Safety Guidelines", summary: "SOP and rules.",
+                    title: "Safety Guidelines", 
+                    summary: "Standard Operating Procedures (SOP) and traffic laws. Key points: 1. Strictly follow Right of Way rules (Straight > Turning). 2. Conduct pre-trip vehicle checks (fluids, tires). 3. Correct use of signals and protective gear.",
                     knowledge: [{ title: "Right of Way", desc: "Yield to straight." }, { title: "Limits", desc: "Max speed." }, { title: "Signals", desc: "Stop on flashing red." }],
                     skills: [{ title: "Gear", desc: "Helmet on." }, { title: "Check", desc: "Pre-ride check." }, { title: "Signal", desc: "Early blinker." }],
                     attitude: [{ title: "Law", desc: "Follow rules." }, { title: "Respect", desc: "Pedestrians." }, { title: "Duty", desc: "No DUI." }],
@@ -260,7 +273,8 @@
             },
             capability: {
                 zh: {
-                    title: "安全能力", summary: "生理與技術評估。",
+                    title: "安全能力", 
+                    summary: "評估駕駛人生理與心理狀態。重點包含：1. 自我覺察疲勞徵兆（如微睡眠）並立即休息。2. 了解抗組織胺等藥物對反應速度的副作用。3. 掌握車輛在雙載或載重時的操控極限差異。",
                     knowledge: [{ title: "疲勞", desc: "微睡眠危險。" }, { title: "藥物", desc: "感冒藥嗜睡。" }, { title: "極限", desc: "載重影響煞車。" }],
                     skills: [{ title: "閃避", desc: "不看障礙物。" }, { title: "穩定", desc: "夾緊油箱。" }, { title: "空間", desc: "判斷車寬。" }],
                     attitude: [{ title: "學習", desc: "持續進修。" }, { title: "誠實", desc: "評估狀態。" }, { title: "冷靜", desc: "情緒控制。" }],
@@ -280,7 +294,8 @@
                     quizPool: [{ q: "吃感冒藥?", options: ["精神好", "嗜睡", "沒差"], ans: 1 }, { q: "長途休息?", options: ["4hr", "2hr", "免"], ans: 1 }, { q: "載人煞車?", options: ["變短", "變長", "不變"], ans: 1 }, { q: "微睡眠?", options: ["休息", "繼續", "喝咖啡"], ans: 0 }]
                 },
                 en: {
-                    title: "Safety Capability", summary: "Physiological & Tech.",
+                    title: "Safety Capability", 
+                    summary: "Evaluate physiological and psychological readiness. Key points: 1. Recognize fatigue signs (microsleep) and rest. 2. Understand side effects of meds like antihistamines. 3. Master vehicle handling limits under load.",
                     knowledge: [{ title: "Fatigue", desc: "Microsleep." }, { title: "Meds", desc: "Drowsiness." }, { title: "Limits", desc: "Load affects braking." }],
                     skills: [{ title: "Evasion", desc: "Look at exit." }, { title: "Stability", desc: "Grip tank." }, { title: "Space", desc: "Width judgment." }],
                     attitude: [{ title: "Learning", desc: "Update skills." }, { title: "Honesty", desc: "Self-assess." }, { title: "Calm", desc: "Control emotions." }],
@@ -426,23 +441,127 @@
             const [isDragging, setIsDragging] = useState(false);
             const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
             const containerRef = useRef(null);
+            
+            // Refs for Leaflet Map
+            const mapRef = useRef(null); // Container DIV
+            const leafletMap = useRef(null); // Map Instance
+            const polylineRef = useRef(null);
+            const markersRef = useRef([]);
 
             // Get coords based on selected school
             const currentCoords = useMemo(() => {
                 return SCHOOL_COORDS[school] || SCHOOL_COORDS[DEFAULT_SCHOOL];
             }, [school]);
+            
+            // --- Helper to get lat/lon for start/end based on school center ---
+            const getPointCoords = (locationStr) => {
+                const base = currentCoords;
+                if (locationStr.includes("Gate") || locationStr.includes("校門")) return base;
+                if (locationStr.includes("Dorm") || locationStr.includes("宿舍")) return { lat: base.lat + 0.002, lon: base.lon - 0.002 };
+                if (locationStr.includes("Admin") || locationStr.includes("行政")) return { lat: base.lat - 0.002, lon: base.lon + 0.001 };
+                
+                if (locationStr.includes("Station") || locationStr.includes("轉運")) return { lat: base.lat - 0.015, lon: base.lon + 0.01 };
+                if (locationStr.includes("City") || locationStr.includes("市區")) return { lat: base.lat + 0.02, lon: base.lon - 0.015 };
+                if (locationStr.includes("Train") || locationStr.includes("火車")) return { lat: base.lat - 0.03, lon: base.lon + 0.02 };
+                
+                return base; 
+            };
 
-            const osmSrc = useMemo(() => {
-                let delta = 0.005; 
-                if (mapScale === 100) delta = 0.002;
-                if (mapScale === 1000) delta = 0.015;
-                const minLon = currentCoords.lon - delta;
-                const maxLon = currentCoords.lon + delta;
-                const minLat = currentCoords.lat - delta;
-                const maxLat = currentCoords.lat + delta;
-                return `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&amp;layer=mapnik`;
-            }, [mapScale, currentCoords]);
+            const startPoint = useMemo(() => getPointCoords(startLoc), [startLoc, currentCoords]);
+            const endPoint = useMemo(() => getPointCoords(endLoc), [endLoc, currentCoords]);
 
+            // --- Traffic Color Logic (Shared) ---
+            const getTrafficColor = (load) => {
+                if (load > 80) return '#ef4444'; // Red
+                if (load > 60) return '#f59e0b'; // Amber
+                return '#10b981'; // Green
+            };
+            const trafficColor = getTrafficColor(trafficLoad);
+            const trafficText = trafficLoad > 80 ? (lang === 'zh' ? '壅塞' : 'Heavy') : trafficLoad > 60 ? (lang === 'zh' ? '車多' : 'Moderate') : (lang === 'zh' ? '順暢' : 'Smooth');
+            
+            // --- Marker HTML Generators (SVG) ---
+            const startMarkerHtml = `
+                <div class="relative w-8 h-8 flex flex-col items-center justify-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#16a34a" class="w-10 h-10 drop-shadow-md">
+                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                   </svg>
+                   <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 flex items-center justify-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-3 h-3">
+                        <path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                     </svg>
+                   </div>
+                </div>
+            `;
+            const endMarkerHtml = `
+                 <div class="relative w-8 h-8 flex flex-col items-center justify-center">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#dc2626" class="w-10 h-10 drop-shadow-md">
+                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                   </svg>
+                   <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="w-2.5 h-2.5">
+                         <rect width="18" height="18" x="3" y="3" rx="2"/>
+                      </svg>
+                   </div>
+                </div>
+            `;
+
+            // --- Leaflet Map Effect ---
+            useEffect(() => {
+                if (mapMode === 'real' && mapRef.current) {
+                    if (!leafletMap.current) {
+                        leafletMap.current = L.map(mapRef.current, {zoomControl: false}).setView([currentCoords.lat, currentCoords.lon], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap contributors'
+                        }).addTo(leafletMap.current);
+                    } else {
+                        leafletMap.current.setView([currentCoords.lat, currentCoords.lon]);
+                    }
+
+                    if (polylineRef.current) polylineRef.current.remove();
+                    markersRef.current.forEach(m => m.remove());
+                    markersRef.current = [];
+
+                    const startIcon = L.divIcon({ html: startMarkerHtml, className: 'custom-pin', iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -40] });
+                    const endIcon = L.divIcon({ html: endMarkerHtml, className: 'custom-pin', iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -40] });
+
+                    const startMarker = L.marker([startPoint.lat, startPoint.lon], {icon: startIcon}).addTo(leafletMap.current)
+                        .bindPopup(`${t.start}: ${startLoc.split('(')[0]}`).openPopup();
+                    markersRef.current.push(startMarker);
+
+                    const endMarker = L.marker([endPoint.lat, endPoint.lon], {icon: endIcon}).addTo(leafletMap.current)
+                        .bindPopup(`${t.end}: ${endLoc.split('(')[0]}`);
+                    markersRef.current.push(endMarker);
+
+                    const latlngs = [[startPoint.lat, startPoint.lon], [endPoint.lat, endPoint.lon]];
+                    
+                    // Route Line Style based on Traffic and Transport
+                    const dashArray = transport === 'walk' ? '10, 10' : null;
+                    polylineRef.current = L.polyline(latlngs, {
+                        color: trafficColor, 
+                        weight: 6, 
+                        opacity: 0.8,
+                        dashArray: dashArray
+                    }).addTo(leafletMap.current);
+                    
+                    leafletMap.current.fitBounds(latlngs, { padding: [50, 50] });
+                    
+                    if (isNight) {
+                         const pane = document.querySelector('.leaflet-tile-pane');
+                         if(pane) pane.style.filter = "invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)";
+                    } else {
+                         const pane = document.querySelector('.leaflet-tile-pane');
+                         if(pane) pane.style.filter = "none";
+                    }
+                } else {
+                    if (leafletMap.current) {
+                        leafletMap.current.remove();
+                        leafletMap.current = null;
+                    }
+                }
+            }, [mapMode, currentCoords, startPoint, endPoint, trafficColor, isNight, lang, transport]);
+
+
+            // --- Sim Mode Logic ---
             useEffect(() => {
                 let newScale = 1.5;
                 if (mapScale === 100) newScale = 2.5;
@@ -451,45 +570,42 @@
                 setViewState(prev => ({ ...prev, scale: newScale }));
             }, [mapScale]);
 
-            const handleZoomIn = () => setViewState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.5, 5) }));
-            const handleZoomOut = () => setViewState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.5, 0.5) }));
+            const handleZoomIn = () => {
+                if (mapMode === 'real' && leafletMap.current) {
+                    leafletMap.current.zoomIn();
+                } else {
+                    setViewState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.5, 5) }));
+                }
+            };
+
+            const handleZoomOut = () => {
+                if (mapMode === 'real' && leafletMap.current) {
+                    leafletMap.current.zoomOut();
+                } else {
+                    setViewState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.5, 0.5) }));
+                }
+            };
+
             const handleWheel = (e) => { e.preventDefault(); e.stopPropagation(); const scaleAdjustment = -e.deltaY * 0.001; setViewState(prev => ({ ...prev, scale: Math.min(Math.max(prev.scale + scaleAdjustment, 0.5), 5) })); };
             const handleMouseDown = (e) => { setIsDragging(true); setLastPos({ x: e.clientX, y: e.clientY }); };
             const handleMouseMove = (e) => { if (!isDragging) return; const dx = e.clientX - lastPos.x; const dy = e.clientY - lastPos.y; setViewState(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy })); setLastPos({ x: e.clientX, y: e.clientY }); };
             const handleMouseUp = () => setIsDragging(false);
 
-            const getTrafficColor = (load) => {
-                if (load > 80) return '#ef4444';
-                if (load > 60) return '#f59e0b'; 
-                return '#10b981';
-            };
-
-            const trafficColor = getTrafficColor(trafficLoad);
-            const trafficText = trafficLoad > 80 ? (lang === 'zh' ? '壅塞' : 'Heavy') : trafficLoad > 60 ? (lang === 'zh' ? '車多' : 'Moderate') : (lang === 'zh' ? '順暢' : 'Smooth');
+            // Sim Mode Styles
             const roadStroke = trafficColor;
             const mainRoadStroke = trafficLoad > 80 ? '#ef4444' : trafficLoad > 60 ? '#f59e0b' : (isNight ? '#475569' : '#fff');
-            
-            const startPos = startLoc.includes("Gate") || startLoc.includes("校門") ? { top: '55%', left: '45%' } : { top: '65%', left: '35%' };
-            const endPos = endLoc.includes("Station") || endLoc.includes("轉運") ? { top: '35%', left: '65%' } : { top: '25%', left: '75%' };
+            const startPosSim = startLoc.includes("Gate") || startLoc.includes("校門") ? { top: '55%', left: '45%' } : { top: '65%', left: '35%' };
+            const endPosSim = endLoc.includes("Station") || endLoc.includes("轉運") ? { top: '35%', left: '65%' } : { top: '25%', left: '75%' };
 
             return (
                 <div className={`border border-slate-300 dark:border-slate-600 rounded-sm w-full h-[400px] relative overflow-hidden group transition-colors duration-500 ${isNight ? 'bg-slate-900' : 'bg-slate-100'}`} style={{ overscrollBehavior: 'contain' }}>
                     <div className="absolute top-2 left-2 z-40 flex bg-white/90 dark:bg-slate-800/90 rounded border border-slate-300 dark:border-slate-600 p-0.5">
-                        <button onClick={() => setMapMode('sim')} className={`px-2 py-1 text-[10px] font-bold rounded-sm ${mapMode === 'sim' ? 'bg-emerald-600 text-white' : 'text-slate-500'}`}>{t.mapModeSim}</button>
                         <button onClick={() => setMapMode('real')} className={`px-2 py-1 text-[10px] font-bold rounded-sm ${mapMode === 'real' ? 'bg-emerald-600 text-white' : 'text-slate-500'}`}>{t.mapModeReal}</button>
+                        <button onClick={() => setMapMode('sim')} className={`px-2 py-1 text-[10px] font-bold rounded-sm ${mapMode === 'sim' ? 'bg-emerald-600 text-white' : 'text-slate-500'}`}>{t.mapModeSim}</button>
                     </div>
 
                     {mapMode === 'real' ? (
-                        <>
-                            <iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src={osmSrc} className="w-full h-full"></iframe>
-                            {/* Static Center Marker for Real Map */}
-                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-                                <div className="relative">
-                                    <MapPin className="w-8 h-8 text-emerald-600 fill-white drop-shadow-md" />
-                                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-1 bg-black/30 blur-[2px] rounded-full"></div>
-                                </div>
-                            </div>
-                        </>
+                        <div id="map" ref={mapRef} className="w-full h-full z-0"></div>
                     ) : (
                         <>
                             <div ref={containerRef} className="w-full h-full cursor-move touch-none" onWheel={handleWheel} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
@@ -505,11 +621,11 @@
                                             <path d="M700,500 L900,300" fill="none" stroke={trafficLoad > 80 ? '#ef4444' : '#10b981'} strokeWidth="8" strokeDasharray="12 6" strokeLinecap="round" className="animate-[dash_20s_linear_infinite]" />
                                         </svg>
                                     </div>
-                                    <div className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center pointer-events-none" style={startPos}>
+                                    <div className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center pointer-events-none" style={startPosSim}>
                                         <div className="relative"><MapPin className="w-12 h-12 text-green-600 fill-green-600 filter drop-shadow-lg" /><div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center"><Triangle className="w-5 h-5 text-white fill-white" /></div></div>
                                         <span className="text-[10px] font-bold bg-white/90 dark:bg-slate-800/90 text-slate-800 dark:text-white px-2 py-0.5 rounded shadow mt-1 whitespace-nowrap">{t.start}: {startLoc.split('(')[0]}</span>
                                     </div>
-                                    <div className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center pointer-events-none" style={endPos}>
+                                    <div className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center pointer-events-none" style={endPosSim}>
                                         <div className="relative"><MapPin className="w-12 h-12 text-red-600 fill-red-600 filter drop-shadow-lg" /><div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-6 h-6 flex items-center justify-center"><Square className="w-4 h-4 text-white fill-white" /></div></div>
                                         <span className="text-[10px] font-bold bg-white/90 dark:bg-slate-800/90 text-slate-800 dark:text-white px-2 py-0.5 rounded shadow mt-1 whitespace-nowrap">{t.end}: {endLoc.split('(')[0]}</span>
                                     </div>
@@ -521,18 +637,20 @@
                                     ))}
                                 </div>
                             </div>
-                            <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-30">
-                                <button onClick={handleZoomIn} className="bg-white/90 dark:bg-slate-800/90 p-1.5 rounded border border-slate-300 dark:border-slate-600 shadow hover:bg-slate-100 dark:hover:bg-slate-700"><ZoomIn className="w-4 h-4 text-slate-700 dark:text-white" /></button>
-                                <button onClick={handleZoomOut} className="bg-white/90 dark:bg-slate-800/90 p-1.5 rounded border border-slate-300 dark:border-slate-600 shadow hover:bg-slate-100 dark:hover:bg-slate-700"><ZoomOut className="w-4 h-4 text-slate-700 dark:text-white" /></button>
-                            </div>
                         </>
                     )}
                     {mapMode === 'sim' && <div className="absolute top-2 right-2 text-[9px] text-slate-500 bg-white/80 px-1 rounded z-30 pointer-events-none flex items-center gap-1"><MousePointer2 className="w-3 h-3"/> {t.mapSimNote}</div>}
                     
-                    {/* Traffic Status Indicator - Moved to Bottom Center */}
+                    {/* Traffic Status Indicator - Bottom Center */}
                     <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-40 flex items-center gap-2 bg-white/95 dark:bg-slate-800/95 px-3 py-1 rounded-full shadow-md border border-slate-200 dark:border-slate-600 pointer-events-none">
                         <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: trafficColor }}></div>
                         <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">{t.trafficLabel}: {trafficText}</span>
+                    </div>
+                    
+                    {/* Unified Zoom Buttons for BOTH modes */}
+                    <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-50">
+                        <button onClick={handleZoomIn} className="bg-white/90 dark:bg-slate-800/90 p-1.5 rounded border border-slate-300 dark:border-slate-600 shadow hover:bg-slate-100 dark:hover:bg-slate-700"><ZoomIn className="w-4 h-4 text-slate-700 dark:text-white" /></button>
+                        <button onClick={handleZoomOut} className="bg-white/90 dark:bg-slate-800/90 p-1.5 rounded border border-slate-300 dark:border-slate-600 shadow hover:bg-slate-100 dark:hover:bg-slate-700"><ZoomOut className="w-4 h-4 text-slate-700 dark:text-white" /></button>
                     </div>
 
                     <div className="absolute bottom-4 left-4 p-3 bg-white/90 dark:bg-slate-800/90 rounded-full border border-slate-300 dark:border-slate-600 shadow-md z-30 pointer-events-none">
@@ -667,7 +785,7 @@
         const Dashboard = ({ activeTab, setActiveTab, lang, toggleLang, theme, toggleTheme, userName, school, currentDateTime, transport, setTransport, timeSlot, setTimeSlot, mapScale, setMapScale, startLocation, setStartLocation, endLocation, setEndLocation, waypoints, handleAddWaypoint, simData, progress, setProgress, pageData, handleLogout }) => {
             const t = UI_TEXT[lang];
             const [selectedGlossaryIndex, setSelectedGlossaryIndex] = useState("");
-            const [mapMode, setMapMode] = useState('sim'); // Default to Simulation
+            const [mapMode, setMapMode] = useState('sim');
             const [openCardId, setOpenCardId] = useState(null);
             const [sections, setSections] = useState({ panel: true, map: true, content: true });
             const toggleSection = (sec) => setSections(prev => ({ ...prev, [sec]: !prev[sec] }));
@@ -922,7 +1040,7 @@
                     
                     <footer className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-6 mt-8">
                         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 dark:text-slate-400">
-                            <div className="mb-4 md:mb-0"><p>&copy; {new Date().getFullYear()} RSA Road Safety Advisor. Ver 2.5.0</p><p className="mt-1">{t.lastUpdate}: {lang === 'zh' ? currentDateTime.toLocaleDateString() : currentDateTime.toLocaleDateString('en-US')}</p></div>
+                            <div className="mb-4 md:mb-0"><p>&copy; {new Date().getFullYear()} RSA Road Safety Advisor. Ver 2.7.0</p><p className="mt-1">{t.lastUpdate}: {lang === 'zh' ? currentDateTime.toLocaleDateString() : currentDateTime.toLocaleDateString('en-US')}</p></div>
                             <div className="flex items-center gap-6">
                                 <a href={LINKS.prof} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors font-bold">{t.creator}</a><div className="h-3 w-px bg-slate-300"></div>
                                 <a href={LINKS.ibs} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">IBS</a><div className="h-3 w-px bg-slate-300"></div>
@@ -949,7 +1067,7 @@
             const [timeSlot, setTimeSlot] = useState('now');
             const [mapScale, setMapScale] = useState(300);
             const [startLocation, setStartLocation] = useState(LOCATIONS.start[0]);
-            const [endLocation, setEndLocation] = useState(LOCATIONS.end[0]);
+            const [endLocation, setEndLocation] = useState(LOCATIONS.end[1]); // Default to City Center
             const [waypoints, setWaypoints] = useState([]);
             
             const [progress, setProgress] = useState({
